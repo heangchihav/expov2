@@ -8,6 +8,7 @@ import { useIsLargeScreen } from '@/hooks/useIsLargeScreen';
 import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import ThemeSwitcher from '@/components/ThemeSwitcherButton';
 
 export default function LanguageLayout() {
   const { theme } = useTheme();
@@ -35,6 +36,7 @@ export default function LanguageLayout() {
         gap: 8
       }}>
         <LanguageSwitcher />
+        <ThemeSwitcher />
       </View>
       <Tabs
         screenOptions={{
