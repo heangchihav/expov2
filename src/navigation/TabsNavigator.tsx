@@ -2,18 +2,18 @@ import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
-import { Redirect, Tabs } from 'expo-router';
-import HomeScreen from '@/screens/HomeScreen';
-import ContactScreen from '@/screens/ContactScreen';
-import PromotionScreen from '@/screens/PromotionScreen';
+import HomeScreen from '@/app/[lang]/index';
+import ContactScreen from '@/app/[lang]/contact';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 export default function TabsNavigator() {
+  const Tabs = createBottomTabNavigator();
   const { language } = useLanguage();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   return (
-    <Tabs
+    <Tabs.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -25,7 +25,7 @@ export default function TabsNavigator() {
       }}
     >
       <Tabs.Screen
-        name="home"
+        name="index"
         component={HomeScreen}
         options={{
           title: language === 'fr' ? 'Accueil' : 'Home',
@@ -52,20 +52,7 @@ export default function TabsNavigator() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="promotion"
-        component={PromotionScreen}
-        options={{
-          title: language === 'fr' ? 'Promotions' : 'Promotions',
-          tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons
-              name={focused ? 'pricetag' : 'pricetag-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-    </Tabs>
+
+    </Tabs.Navigator>
   );
 }

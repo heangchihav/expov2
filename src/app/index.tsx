@@ -26,7 +26,7 @@ export default function Root() {
   useEffect(() => {
     if (!isLoading && storedLanguage) {
       router.replace({
-        pathname: '/[lang]/home',
+        pathname: '/[lang]',
         params: { lang: storedLanguage }
       });
     }
