@@ -4,9 +4,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function HomeScreen() {
-  const { theme } = useTheme();
+  const { isDark } = useTheme();
   const { language } = useLanguage();
-  const isDark = theme === 'dark';
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#1a1a1a' : '#ffffff' }]}>

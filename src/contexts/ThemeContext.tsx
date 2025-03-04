@@ -3,39 +3,31 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from 'react-native';
 
+// Theme that user can select
 export type ThemeType = 'light' | 'dark' | 'system';
-export type Theme = 'light' | 'dark';
 
-// Constants for better maintainability
-export const VALID_THEMES: ThemeType[] = ['light', 'dark', 'system'];
-export const DEFAULT_THEME: ThemeType = 'system';
-const STORAGE_KEY = 'theme';
+const STORAGE_KEY = '@theme';
 
 interface ThemeContextProps {
-  theme: ThemeType;
-  currentTheme: Theme;
+  theme: ThemeType;           // What user selected (light/dark/system)
+  isDark: boolean;           // Simple boolean for components to use
   setTheme: (theme: ThemeType) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps>({
-  theme: DEFAULT_THEME,
-  currentTheme: 'light',
+  theme: 'system',
+  isDark: false,
   setTheme: () => { },
 });
 
-interface ThemeProviderProps {
-  children: ReactNode;
-}
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [theme, setThemeState] = useState<ThemeType>('system');
+  const systemTheme = useColorScheme();
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setThemeState] = useState<ThemeType>(DEFAULT_THEME);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const systemTheme = useColorScheme() as Theme || 'light';
+  // Simple boolean for components to use - true if dark mode
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
 
-  // Calculate the actual theme based on system preference
-  const currentTheme: Theme = theme === 'system' ? systemTheme : theme as Theme;
-
-  // Function to set theme and save to storage
+  // Save theme to storage and update state
   const setTheme = async (newTheme: ThemeType) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, newTheme);
@@ -45,39 +37,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
   };
 
+  // Load saved theme on startup
   useEffect(() => {
-    // Load theme from AsyncStorage when the component mounts
-    const loadTheme = async () => {
-      try {
-        const storedTheme = await AsyncStorage.getItem(STORAGE_KEY);
-        if (storedTheme && VALID_THEMES.includes(storedTheme as ThemeType)) {
-          setThemeState(storedTheme as ThemeType);
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then(savedTheme => {
+        if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system') {
+          setThemeState(savedTheme);
         }
-      } catch (error) {
-        console.error('Failed to load theme from storage:', error);
-      } finally {
-        setIsInitialized(true);
-      }
-    };
-
-    loadTheme();
+      })
+      .catch(error => console.error('Failed to load theme:', error));
   }, []);
 
-  // Update theme when system preference changes
-  useEffect(() => {
-    if (theme === 'system') {
-      // No need to update state, as currentTheme will be recalculated
-      console.log('System theme changed to:', systemTheme);
-    }
-  }, [systemTheme, theme]);
-
-  // Don't render children until theme is initialized
-  if (!isInitialized) {
-    return null;
-  }
-
   return (
-    <ThemeContext.Provider value={{ theme, currentTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, isDark, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

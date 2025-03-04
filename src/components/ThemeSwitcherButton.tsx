@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ThemeType, useTheme, VALID_THEMES } from '../contexts/ThemeContext';
+import { ThemeType, useTheme } from '@/contexts/ThemeContext';
 
 export default function ThemeSwitcher() {
-  const { theme, currentTheme, setTheme } = useTheme();
+  const { theme, isDark, setTheme } = useTheme();
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const getThemeIcon = (themeType: ThemeType) => {
@@ -14,7 +14,7 @@ export default function ThemeSwitcher() {
       case 'dark':
         return <Ionicons name="moon" size={16} color="#FFD700" />;
       case 'system':
-        return <Ionicons name="phone-portrait" size={16} color="#808080" />;
+        return <Ionicons name="phone-portrait" size={16} color={isDark ? '#808080' : '#666666'} />;
     }
   };
 
@@ -37,26 +37,28 @@ export default function ThemeSwitcher() {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.button, isDark && styles.buttonDark]}
         onPress={() => setDropdownVisible(!dropdownVisible)}
       >
         {getThemeIcon(theme)}
-        <Text style={styles.buttonText}>{getThemeLabel(theme)}</Text>
+        <Text style={[styles.buttonText, isDark && styles.textDark]}>
+          {getThemeLabel(theme)}
+        </Text>
         <Ionicons
           name={dropdownVisible ? 'chevron-up' : 'chevron-down'}
           size={16}
-          color="#000"
+          color={isDark ? '#fff' : '#000'}
         />
       </TouchableOpacity>
 
       {dropdownVisible && (
-        <View style={styles.dropdown}>
-          {VALID_THEMES.map((themeOption) => (
+        <View style={[styles.dropdown, isDark && styles.dropdownDark]}>
+          {(['light', 'dark', 'system'] as ThemeType[]).map((themeOption) => (
             <TouchableOpacity
               key={themeOption}
               style={[
                 styles.dropdownItem,
-                theme === themeOption && styles.activeItem,
+                theme === themeOption && (isDark ? styles.activeItemDark : styles.activeItem),
               ]}
               onPress={() => handleThemeChange(themeOption)}
             >
@@ -64,6 +66,7 @@ export default function ThemeSwitcher() {
               <Text
                 style={[
                   styles.dropdownText,
+                  isDark && styles.textDark,
                   theme === themeOption && styles.activeText,
                 ]}
               >
@@ -93,9 +96,17 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     gap: 8,
   },
+  buttonDark: {
+    backgroundColor: '#333',
+    borderColor: '#555',
+  },
   buttonText: {
     fontSize: 14,
     fontWeight: '500',
+    color: '#000',
+  },
+  textDark: {
+    color: '#fff',
   },
   dropdown: {
     position: 'absolute',
@@ -108,6 +119,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minWidth: '100%',
   },
+  dropdownDark: {
+    backgroundColor: '#333',
+    borderColor: '#555',
+  },
   dropdownItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -118,8 +133,12 @@ const styles = StyleSheet.create({
   activeItem: {
     backgroundColor: '#f0f0f0',
   },
+  activeItemDark: {
+    backgroundColor: '#444',
+  },
   dropdownText: {
     fontSize: 14,
+    color: '#000',
   },
   activeText: {
     fontWeight: '500',
